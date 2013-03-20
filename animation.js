@@ -1,5 +1,5 @@
 /*
-* Animation.js v1.0.0 Copyright (c) 2013
+* Animation.js v1.0.1 Copyright (c) 2013
 * License: MIT
 * Author: Roll
 * http://github.com/rollRoll/Animation.js
@@ -9,9 +9,12 @@
 		Animation,
 		_ieVersion,
 		_isIEBrowser,
+		_div = document.createElement( 'div' ),
 		_hasRnBFramework = !! ( window.R && window.RnB && R.Util );
 
 	Animation = {
+
+		timeCls: 'animated',
 		
 		/**
 		 * Get the major version of IE
@@ -54,12 +57,11 @@
 					var 
 						prefixes = [defaults, "Moz" + cssName, "Webkit" + cssName, "ms" + cssName, "O" + cssName],
 						reg  = new RegExp('(.+)' + defaults, 'i'),
-						tmp = document.createElement("div"),
 						i = 0, len = prefixes.length,
 						matchs, defaultPrefix = "";
 					
-	 			    for ( ; i < len; i++ ) {
-						if ( tmp.style[ prefixes[ i ] ] !== undefined ) {
+					for ( ; i < len; i++ ) {
+						if ( _div.style[ prefixes[ i ] ] !== undefined ) {
 							matchs = prefixes[ i ].match( reg );
 							return ( matchs )? matchs[1].toLowerCase() : defaultPrefix;
 						}
@@ -86,26 +88,23 @@
 			$dom.off( vendorEventName );
 		},
 
-		animateIn: function($dom, animateCls, callback, speedCls, removeClass) {
-			var 
-				event = 'AnimationEnd',
-				cls = ( speedCls === null? '' : speedCls || 'animated07' ) + ' ' + animateCls;
-			
-			Animation.offCss3Event($dom, event, true);
+		animateIn: function($dom, animateCls, callback, timeCls, removeClass) {
+			var cls = ( timeCls === null? '' : timeCls || Animation.timeCls ) + ' ' + animateCls;
+			$dom.offAnimationEnd( true );
 			$dom.show().addClass( cls );
-			Animation.onCss3Event($dom, event, function() {
+			$dom.onAnimationEnd(function( e ) {
 				( removeClass !== false ) && $dom.removeClass( cls );
-				( callback ) && callback();
+				( callback ) && callback( e );
 			});
 			return $dom;
 		},
 
-		animateOut: function($dom, animateCls, callback, speedCls) {
-			var cls = ( speedCls === null? '' : speedCls || 'animated07' ) + ' ' + animateCls;
+		animateOut: function($dom, animateCls, callback, timeCls) {
+			var cls = ( timeCls === null? '' : timeCls || Animation.timeCls ) + ' ' + animateCls;
 			$dom.addClass( cls );
-			Animation.onCss3Event($dom, 'AnimationEnd', function() {
+			$dom.onAnimationEnd(function( e ) {
 				$dom.hide().removeClass( cls );
-				( callback ) && callback();
+				( callback ) && callback( e );
 			});
 			return $dom;
 		},
@@ -118,6 +117,17 @@
 
 	_ieVersion = Animation.isIE(),
 	_isIEBrowser = ( _ieVersion && _ieVersion < 10 );
+
+
+	$.fn.extend({
+		onAnimationEnd: function( callback ) {
+			return Animation.onCss3Event(this, 'AnimationEnd', callback);
+		},
+
+		offAnimationEnd: function( stop ) {
+			return Animation.offCss3Event(this, 'AnimationEnd', stop);
+		}
+	});
 
 	// Expose Animation to the global object
 	window.Animation = Animation;
