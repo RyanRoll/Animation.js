@@ -76,13 +76,13 @@
 			return ( vendorPrefix )? vendorPrefix + cssName : cssName.toLowerCase();
 		},
 
-		onCss3Event: function($dom, eventName, eventFn) {
+		on: function($dom, eventName, eventFn) {
 			var vendorEventName = Animation.prefixed( eventName );
 			$dom.one(vendorEventName, eventFn);
 			( _isIEBrowser ) && $dom.trigger( vendorEventName );
 		},
 
-		offCss3Event: function($dom, eventName, stop) {
+		off: function($dom, eventName, stop) {
 			var vendorEventName = Animation.prefixed( eventName );
 			( stop ) && $dom.trigger( vendorEventName );
 			$dom.off( vendorEventName );
@@ -121,11 +121,11 @@
 
 	$.fn.extend({
 		onAnimationEnd: function( callback ) {
-			return Animation.onCss3Event(this, 'AnimationEnd', callback);
+			return Animation.on(this, 'AnimationEnd', callback);
 		},
 
 		offAnimationEnd: function( stop ) {
-			return Animation.offCss3Event(this, 'AnimationEnd', stop);
+			return Animation.off(this, 'AnimationEnd', stop);
 		}
 	});
 
